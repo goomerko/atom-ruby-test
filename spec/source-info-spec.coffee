@@ -152,6 +152,13 @@ describe "SourceInfo", ->
       setUpWithoutOpenFile()
       expect(sourceInfo.minitestRegExp("test something", "spec")).toBe("")
 
+  describe "::minitestTestName", ->
+    it "correctly
+    returns the matching test_name for minitest unit", ->
+      setUpWithOpenFile()
+      expect(sourceInfo.minitestTestName("test \"something large\" do", "block"))
+        .toBe("test_something_large")
+
   describe "::isMiniTest", ->
     it "correctly returns true if it is minitest spec file", ->
       setUpWithOpenFile()

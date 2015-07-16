@@ -31,7 +31,8 @@ module.exports =
           @testParams.testFileCommand()
       cmd.replace('{relative_path}', @testParams.activeFile()).
           replace('{line_number}', @testParams.currentLine()).
-          replace('{regex}', @testParams.minitestRegExp())
+          replace('{regex}', @testParams.minitestRegExp()).
+          replace('{test_name}', @testParams.minitestTestName())
 
     cancel: ->
       @shell.kill()

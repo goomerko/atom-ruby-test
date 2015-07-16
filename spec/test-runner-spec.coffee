@@ -15,6 +15,7 @@ describe "TestRunner", ->
     spyOn(SourceInfo.prototype, 'activeFile').andReturn('fooTestFile')
     spyOn(SourceInfo.prototype, 'currentLine').andReturn(100)
     spyOn(SourceInfo.prototype, 'minitestRegExp').andReturn('test foo')
+    spyOn(SourceInfo.prototype, 'minitestTestName').andReturn('test_foo')
     spyOn(SourceInfo.prototype, 'testFileCommand').andReturn('fooTestCommand {relative_path}')
     spyOn(SourceInfo.prototype, 'testSingleCommand').andReturn('fooTestCommand {relative_path}:{line_number}')
 

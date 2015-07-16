@@ -12,6 +12,7 @@ module.exports =
 
     matchers:
       method: /def\s(.*?)$/
+      block: /test.*[\"\']([a-zA-Z_\"\'\s\d\-\.#=?!:\/]+)[\"\']/
       spec: /(?:"|')(.*?)(?:"|')/
 
     currentShell: ->
@@ -50,17 +51,28 @@ module.exports =
         else
           ""
 
+    minitestTestName: (text, type)->
+      @_minitestTestName ||= unless @_minitestTestName
+        value = text.match(@matchers[type]) if text?
+        if value
+          test_name = value[1].replace('"', '').replace(" ", "_")
+          "test_#{test_name}"
+        else
+          ""
+
     isMiniTest: ->
       editor = atom.workspace.getActiveTextEditor()
       i = @currentLine() - 1
       regExp = null
       isSpec = false
       isUnit = false
+      isUnitBlock = false
       isRSpec = false
       specRegExp = new RegExp(/^(\s+)(should|test|it)\s+['""'](.*)['""']\s+do\s*(?:#.*)?$/)
       rspecRequireRegExp = new RegExp(/^require(\s+)['"](rails|spec)_helper['"]$/)
       minitestClassRegExp = new RegExp(/class\s(.*)<(\s?|\s+)Minitest::Test/)
       minitestMethodRegExp = new RegExp(/^(\s+)def\s(.*)$/)
+      minitestBlockRegExp = new RegExp(/test.*([\"\']([a-zA-Z_\"\'\s\d\-\.#=?!:\/]+)[\"\'])/)
       while i >= 0
         text = editor.lineTextForBufferRow(i)
         # check if it is rspec or minitest spec
@@ -72,6 +84,11 @@ module.exports =
           isUnit = true
           regExp = text
 
+        # check if it is minitest block test
+        else if !regExp && minitestBlockRegExp.test(text)
+          isUnitBlock = true
+          regExp = text
+
         # if it is spec and has require spec_helper which means it is rspec spec
         else if rspecRequireRegExp.test(text)
           isRSpec = true
@@ -81,7 +98,10 @@ module.exports =
           @minitestRegExp(regExp, "method")
           return true
 
-        i--
+        # if it is unit block test and inherit from Minitest::Unit
+        else if isUnitBlock && minitestClassRegExp.test(text)
+          @minitestTestName(regExp, "block")
+          return true
 
       if !isRSpec && isSpec
         @minitestRegExp(regExp, "spec")
